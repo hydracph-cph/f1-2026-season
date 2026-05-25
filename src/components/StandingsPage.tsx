@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { drivers } from '../data/f1Data';
+import { useF1 } from '../context/F1Context';
 
 const StandingsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { drivers, loading, season } = useF1();
   const sorted = [...drivers].sort((a, b) => b.points - a.points);
   const maxPoints = sorted[0]?.points || 1;
 
@@ -20,12 +21,21 @@ const StandingsPage: React.FC = () => {
 
   const maxTeamPoints = teamStandings[0]?.points || 1;
 
+  if (loading) {
+    return (
+      <div className="pt-20 flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400">正在加载积分数据...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-8 space-y-10">
       <section>
         <h1 className="text-3xl font-black mb-6">
           <i className="fa-solid fa-ranking-star mr-3 text-primary" />
-          2026 车手积分榜
+          {season} 车手积分榜
         </h1>
         <div className="bg-f1-card border border-f1-border rounded-xl overflow-hidden">
           <div className="grid grid-cols-[60px_1fr_100px_80px_80px_80px] gap-2 px-6 py-3 bg-black/40 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -34,7 +44,7 @@ const StandingsPage: React.FC = () => {
             <span>积分</span>
             <span className="text-center">冠军</span>
             <span className="text-center">领奖台</span>
-            <span className="text-center">杆位</span>
+            <span className="text-center">最快圈</span>
           </div>
           {sorted.map((driver, index) => (
             <div
@@ -63,7 +73,14 @@ const StandingsPage: React.FC = () => {
                   style={{ backgroundColor: driver.teamColor }}
                 />
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
-                  <img src={driver.image} alt={driver.nameZh} className="w-full h-full object-cover" />
+                  <img
+                    src={driver.image}
+                    alt={driver.nameZh}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/80x80/1e1e2e/666?text=${driver.number}`;
+                    }}
+                  />
                 </div>
                 <div className="min-w-0">
                   <p className="text-white font-bold text-sm group-hover:text-primary transition-colors truncate">
@@ -86,7 +103,7 @@ const StandingsPage: React.FC = () => {
               </div>
               <p className="text-center text-gray-400 text-sm font-medium">{driver.wins}</p>
               <p className="text-center text-gray-400 text-sm font-medium">{driver.podiums}</p>
-              <p className="text-center text-gray-400 text-sm font-medium">{driver.poles}</p>
+              <p className="text-center text-gray-400 text-sm font-medium">{driver.fastestLaps}</p>
             </div>
           ))}
         </div>

@@ -1,11 +1,21 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { drivers, races } from '../data/f1Data';
+import { useF1 } from '../context/F1Context';
 
 const DriverDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { drivers, races, loading, season } = useF1();
   const driver = drivers.find(d => d.id === id);
+
+  if (loading) {
+    return (
+      <div className="pt-20 flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400">加载中...</p>
+      </div>
+    );
+  }
 
   if (!driver) {
     return (
@@ -22,16 +32,15 @@ const DriverDetail: React.FC = () => {
     );
   }
 
-  const rank = [...drivers].sort((a, b) => b.points - a.points).findIndex(d => d.id === id) + 1;
-  const driverWins = races.filter(r => r.winner === driver.name);
+  const driverWins = races.filter(r => r.winnerId === driver.id);
 
   const stats = [
-    { label: '积分榜排名', value: `P${rank}`, icon: 'fa-ranking-star' },
+    { label: '积分榜排名', value: `P${driver.position}`, icon: 'fa-ranking-star' },
     { label: '总积分', value: driver.points, icon: 'fa-star' },
     { label: '分站冠军', value: driver.wins, icon: 'fa-trophy' },
     { label: '领奖台', value: driver.podiums, icon: 'fa-medal' },
-    { label: '杆位', value: driver.poles, icon: 'fa-bolt' },
     { label: '最快圈速', value: driver.fastestLaps, icon: 'fa-gauge-high' },
+    { label: '车号', value: `#${driver.number}`, icon: 'fa-hashtag' },
   ];
 
   return (
@@ -54,6 +63,9 @@ const DriverDetail: React.FC = () => {
                   src={driver.image}
                   alt={driver.nameZh}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x400/1e1e2e/666?text=${driver.number}`;
+                  }}
                 />
               </div>
             </div>
@@ -105,7 +117,7 @@ const DriverDetail: React.FC = () => {
         <div className="mt-8">
           <h2 className="text-xl font-black mb-4 flex items-center gap-2">
             <i className="fa-solid fa-trophy text-yellow-500" />
-            2026 赛季胜场
+            {season} 赛季胜场
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {driverWins.map((race) => (
@@ -131,7 +143,7 @@ const DriverDetail: React.FC = () => {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {drivers
-            .filter(d => d.team === driver.team && d.id !== driver.id)
+            .filter(d => d.teamId === driver.teamId && d.id !== driver.id)
             .map((teammate) => (
               <div
                 key={teammate.id}
@@ -139,7 +151,14 @@ const DriverDetail: React.FC = () => {
                 className="bg-f1-card border border-f1-border rounded-xl p-4 flex items-center gap-4 cursor-pointer hover:border-gray-600 transition-all group"
               >
                 <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
-                  <img src={teammate.image} alt={teammate.nameZh} className="w-full h-full object-cover" />
+                  <img
+                    src={teammate.image}
+                    alt={teammate.nameZh}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/100x100/1e1e2e/666?text=${teammate.number}`;
+                    }}
+                  />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-white font-bold text-sm group-hover:text-primary transition-colors">

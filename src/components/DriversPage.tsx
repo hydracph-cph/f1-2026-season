@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { drivers } from '../data/f1Data';
-
-const teams = ['全部', ...Array.from(new Set(drivers.map(d => d.teamZh)))];
-const teamMap: Record<string, string> = {};
-drivers.forEach(d => { teamMap[d.teamZh] = d.team; });
+import { useF1 } from '../context/F1Context';
 
 const DriversPage: React.FC = () => {
   const navigate = useNavigate();
+  const { drivers, loading } = useF1();
   const [selectedTeam, setSelectedTeam] = useState('全部');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const teams = useMemo(() => {
+    return ['全部', ...Array.from(new Set(drivers.map(d => d.teamZh)))];
+  }, [drivers]);
 
   const filtered = drivers.filter(d => {
     const teamMatch = selectedTeam === '全部' || d.teamZh === selectedTeam;
@@ -18,6 +19,15 @@ const DriversPage: React.FC = () => {
       d.teamZh.includes(searchQuery);
     return teamMatch && searchMatch;
   });
+
+  if (loading) {
+    return (
+      <div className="pt-20 flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400">正在加载车手数据...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-8">
@@ -68,6 +78,9 @@ const DriversPage: React.FC = () => {
                   src={driver.image}
                   alt={driver.nameZh}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/100x100/1e1e2e/666?text=${driver.number}`;
+                  }}
                 />
               </div>
               <div className="flex-1 min-w-0">

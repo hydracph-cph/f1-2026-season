@@ -1,13 +1,30 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { races, drivers } from '../data/f1Data';
-import { format, parseISO } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { useF1 } from '../context/F1Context';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const hotDrivers = drivers.filter(d => d.isHot);
+  const { drivers, races, loading, error, season } = useF1();
+  const hotDrivers = drivers.slice(0, 5);
   const nextRace = races.find(r => r.status === 'next');
+
+  if (loading) {
+    return (
+      <div className="pt-20 flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400">正在从 Formula 1 获取最新数据...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="pt-20 text-center">
+        <i className="fa-solid fa-triangle-exclamation text-4xl text-yellow-500 mb-4" />
+        <p className="text-gray-400">数据加载失败: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-8 space-y-10">
@@ -25,7 +42,7 @@ const HomePage: React.FC = () => {
             </h2>
             <p className="text-gray-400 text-lg">{nextRace.circuit}</p>
             <p className="text-gray-500 mt-1">
-              {format(parseISO(nextRace.date), 'yyyy年M月d日', { locale: zhCN })} &middot; 第 {nextRace.round} 站
+              {nextRace.date} &middot; 第 {nextRace.round} 站
             </p>
           </div>
         </div>
@@ -51,19 +68,20 @@ const HomePage: React.FC = () => {
               onClick={() => navigate(`/driver/${driver.id}`)}
               className="group bg-f1-card border border-f1-border rounded-xl overflow-hidden cursor-pointer hover:border-gray-600 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20"
             >
-              <div
-                className="h-1.5"
-                style={{ backgroundColor: driver.teamColor }}
-              />
-              <div className="relative h-48 overflow-hidden bg-gradient-to-b from-gray-800 to-f1-card">
+              <div className="h-1.5" style={{ backgroundColor: driver.teamColor }} />
+              <div className="relative h-48 overflow-hidden bg-gradient-to-b from-gray-800 to-f1-card flex items-center justify-center">
                 <img
                   src={driver.image}
                   alt={driver.nameZh}
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/300x300/1e1e2e/666?text=${driver.number}`;
+                  }}
                 />
                 <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1">
                   <span className="text-white font-black text-lg">#{driver.number}</span>
                 </div>
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-f1-card to-transparent" />
               </div>
               <div className="p-4">
                 <h3 className="text-white font-bold text-base group-hover:text-primary transition-colors">
@@ -93,7 +111,7 @@ const HomePage: React.FC = () => {
       <section>
         <h2 className="text-2xl font-black flex items-center gap-3 mb-6">
           <i className="fa-solid fa-calendar-days text-primary" />
-          2026 赛季日历
+          {season} 赛季日历
         </h2>
         <div className="space-y-3">
           {races.map((race) => (
@@ -121,7 +139,7 @@ const HomePage: React.FC = () => {
               </div>
               <div className="text-right">
                 <p className={`text-sm font-medium ${race.status === 'completed' ? 'text-gray-600' : 'text-gray-400'}`}>
-                  {format(parseISO(race.date), 'M月d日', { locale: zhCN })}
+                  {race.date}
                 </p>
                 {race.status === 'completed' && race.winnerZh && (
                   <p className="text-xs text-gray-600 mt-0.5">
