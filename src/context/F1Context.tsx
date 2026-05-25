@@ -50,23 +50,23 @@ interface F1ContextType {
 }
 
 const F1Context = createContext<F1ContextType>({
-  drivers: [], races: [], loading: true, error: null, season: '2025'
+  drivers: [], races: [], loading: true, error: null, season: '2026'
 });
 
 export const useF1 = () => useContext(F1Context);
 
-const API = 'https://api.jolpi.ca/ergast/f1/2025';
+const API = 'https://api.jolpi.ca/ergast/f1/current';
 
-function buildImageUrl(firstName: string, lastName: string): string {
+function buildImageUrl(firstName: string, lastName: string, year: string): string {
   const fn = firstName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const ln = lastName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const code = (fn.substring(0, 3) + ln.substring(0, 3)).toUpperCase();
-  return `https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2025Drivers/${code}01_${fn}_${ln}/${code.toLowerCase()}01.png.transform/2col-retina/image.png`;
+  return `https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/${year}Drivers/${code}01_${fn}_${ln}/${code.toLowerCase()}01.png.transform/2col-retina/image.png`;
 }
 
 export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<F1ContextType>({
-    drivers: [], races: [], loading: true, error: null, season: '2025'
+    drivers: [], races: [], loading: true, error: null, season: '2026'
   });
 
   useEffect(() => { loadData(); }, []);
@@ -136,7 +136,7 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
           points: parseFloat(s.points) || 0, wins: parseInt(s.wins) || 0,
           podiums: podiums[dId] || 0, fastestLaps: fls[dId] || 0,
           dob: d.dateOfBirth || '',
-          image: of1?.url || buildImageUrl(fn, ln),
+          image: of1?.url || buildImageUrl(fn, ln, '2026'),
           teamColor: of1?.color || teamColors[c?.constructorId] || '#666',
           position: parseInt(s.position) || (i + 1),
         };
@@ -163,7 +163,8 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
       const first = races.find(r => r.status === 'upcoming');
       if (first) first.status = 'next';
 
-      setState({ drivers, races, loading: false, error: null, season: '2025' });
+      const detectedSeason = rawSchedule?.[0]?.season || '2026';
+      setState({ drivers, races, loading: false, error: null, season: detectedSeason });
     } catch (e: any) {
       setState(prev => ({ ...prev, loading: false, error: e.message }));
     }

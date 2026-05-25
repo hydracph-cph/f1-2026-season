@@ -1,4 +1,4 @@
-const SEASON = '2025';
+const SEASON = 'current';
 const ERGAST = `https://api.jolpi.ca/ergast/f1/${SEASON}`;
 
 export async function fetchDriverStandings() {
