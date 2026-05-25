@@ -25,7 +25,7 @@ const StandingsPage: React.FC = () => {
       <section>
         <h1 className="text-3xl font-black mb-6">
           <i className="fa-solid fa-ranking-star mr-3 text-primary" />
-          2025 Driver Standings
+          2026 Driver Standings
         </h1>
         <div className="bg-f1-card border border-f1-border rounded-xl overflow-hidden">
           <div className="grid grid-cols-[60px_1fr_100px_80px_80px_80px] gap-2 px-6 py-3 bg-black/40 text-xs font-semibold text-gray-500 uppercase tracking-wider">

@@ -92,7 +92,7 @@ const HomePage: React.FC = () => {
       <section>
         <h2 className="text-2xl font-black flex items-center gap-3 mb-6">
           <i className="fa-solid fa-calendar-days text-primary" />
-          2025 Race Calendar
+          2026 Race Calendar
         </h2>
         <div className="space-y-3">
           {races.map((race) => (
