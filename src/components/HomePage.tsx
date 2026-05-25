@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { races, drivers } from '../data/f1Data';
 import { format, parseISO } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,15 +17,15 @@ const HomePage: React.FC = () => {
           <div className="relative">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-full uppercase tracking-wider animate-pulse">
-                Next Race
+                下一站
               </span>
             </div>
             <h2 className="text-3xl font-black mb-2">
-              {nextRace.flag} {nextRace.name}
+              {nextRace.flag} {nextRace.nameZh}
             </h2>
             <p className="text-gray-400 text-lg">{nextRace.circuit}</p>
             <p className="text-gray-500 mt-1">
-              {format(parseISO(nextRace.date), 'MMMM d, yyyy')} &middot; Round {nextRace.round}
+              {format(parseISO(nextRace.date), 'yyyy年M月d日', { locale: zhCN })} &middot; 第 {nextRace.round} 站
             </p>
           </div>
         </div>
@@ -34,13 +35,13 @@ const HomePage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black flex items-center gap-3">
             <i className="fa-solid fa-fire text-primary" />
-            Hot Drivers
+            热门车手
           </h2>
           <button
             onClick={() => navigate('/drivers')}
             className="text-sm text-gray-400 hover:text-primary transition-colors font-medium"
           >
-            View All <i className="fa-solid fa-arrow-right ml-1" />
+            查看全部 <i className="fa-solid fa-arrow-right ml-1" />
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -57,7 +58,7 @@ const HomePage: React.FC = () => {
               <div className="relative h-48 overflow-hidden bg-gradient-to-b from-gray-800 to-f1-card">
                 <img
                   src={driver.image}
-                  alt={driver.name}
+                  alt={driver.nameZh}
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1">
@@ -66,20 +67,20 @@ const HomePage: React.FC = () => {
               </div>
               <div className="p-4">
                 <h3 className="text-white font-bold text-base group-hover:text-primary transition-colors">
-                  {driver.name}
+                  {driver.nameZh}
                 </h3>
-                <p className="text-gray-500 text-sm mt-0.5">{driver.team}</p>
+                <p className="text-gray-500 text-sm mt-0.5">{driver.teamZh}</p>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-f1-border">
                   <div>
-                    <p className="text-xs text-gray-500">Points</p>
+                    <p className="text-xs text-gray-500">积分</p>
                     <p className="text-white font-bold">{driver.points}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Wins</p>
+                    <p className="text-xs text-gray-500">冠军</p>
                     <p className="text-white font-bold">{driver.wins}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Podiums</p>
+                    <p className="text-xs text-gray-500">领奖台</p>
                     <p className="text-white font-bold">{driver.podiums}</p>
                   </div>
                 </div>
@@ -92,7 +93,7 @@ const HomePage: React.FC = () => {
       <section>
         <h2 className="text-2xl font-black flex items-center gap-3 mb-6">
           <i className="fa-solid fa-calendar-days text-primary" />
-          2026 Race Calendar
+          2026 赛季日历
         </h2>
         <div className="space-y-3">
           {races.map((race) => (
@@ -114,23 +115,23 @@ const HomePage: React.FC = () => {
               <div className="text-2xl w-10 text-center">{race.flag}</div>
               <div className="flex-1 min-w-0">
                 <h3 className={`font-bold text-sm ${race.status === 'completed' ? 'text-gray-500' : 'text-white'}`}>
-                  {race.name}
+                  {race.nameZh}
                 </h3>
                 <p className="text-gray-600 text-xs mt-0.5">{race.circuit}</p>
               </div>
               <div className="text-right">
                 <p className={`text-sm font-medium ${race.status === 'completed' ? 'text-gray-600' : 'text-gray-400'}`}>
-                  {format(parseISO(race.date), 'MMM d')}
+                  {format(parseISO(race.date), 'M月d日', { locale: zhCN })}
                 </p>
-                {race.status === 'completed' && race.winner && (
+                {race.status === 'completed' && race.winnerZh && (
                   <p className="text-xs text-gray-600 mt-0.5">
                     <i className="fa-solid fa-trophy text-yellow-600 mr-1" />
-                    {race.winner}
+                    {race.winnerZh}
                   </p>
                 )}
                 {race.status === 'next' && (
                   <span className="inline-block mt-1 px-2 py-0.5 bg-primary text-white text-xs font-bold rounded-full">
-                    NEXT
+                    下一站
                   </span>
                 )}
               </div>

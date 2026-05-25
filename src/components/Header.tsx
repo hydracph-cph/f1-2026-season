@@ -11,7 +11,7 @@ const Header: React.FC = () => {
               <span className="text-white font-black text-lg">F1</span>
             </div>
             <span className="text-white font-bold text-xl tracking-wide group-hover:text-primary transition-colors">
-              FORMULA 1
+              一级方程式
             </span>
           </NavLink>
           <nav className="flex items-center gap-1">
@@ -27,7 +27,7 @@ const Header: React.FC = () => {
               }
             >
               <i className="fa-solid fa-flag-checkered mr-2" />
-              Race Schedule
+              赛程安排
             </NavLink>
             <NavLink
               to="/drivers"
@@ -40,7 +40,7 @@ const Header: React.FC = () => {
               }
             >
               <i className="fa-solid fa-helmet-safety mr-2" />
-              Drivers
+              车手列表
             </NavLink>
             <NavLink
               to="/standings"
@@ -53,7 +53,7 @@ const Header: React.FC = () => {
               }
             >
               <i className="fa-solid fa-trophy mr-2" />
-              Standings
+              积分排行
             </NavLink>
           </nav>
         </div>

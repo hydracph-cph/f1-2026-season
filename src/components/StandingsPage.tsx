@@ -9,11 +9,11 @@ const StandingsPage: React.FC = () => {
 
   const teamStandings = Object.values(
     drivers.reduce((acc, d) => {
-      if (!acc[d.team]) {
-        acc[d.team] = { team: d.team, points: 0, color: d.teamColor, drivers: [] as string[] };
+      if (!acc[d.teamZh]) {
+        acc[d.teamZh] = { team: d.teamZh, points: 0, color: d.teamColor, drivers: [] as string[] };
       }
-      acc[d.team].points += d.points;
-      acc[d.team].drivers.push(d.name);
+      acc[d.teamZh].points += d.points;
+      acc[d.teamZh].drivers.push(d.nameZh);
       return acc;
     }, {} as Record<string, { team: string; points: number; color: string; drivers: string[] }>)
   ).sort((a, b) => b.points - a.points);
@@ -25,16 +25,16 @@ const StandingsPage: React.FC = () => {
       <section>
         <h1 className="text-3xl font-black mb-6">
           <i className="fa-solid fa-ranking-star mr-3 text-primary" />
-          2026 Driver Standings
+          2026 车手积分榜
         </h1>
         <div className="bg-f1-card border border-f1-border rounded-xl overflow-hidden">
           <div className="grid grid-cols-[60px_1fr_100px_80px_80px_80px] gap-2 px-6 py-3 bg-black/40 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            <span>Pos</span>
-            <span>Driver</span>
-            <span>Points</span>
-            <span className="text-center">Wins</span>
-            <span className="text-center">Podiums</span>
-            <span className="text-center">Poles</span>
+            <span>排名</span>
+            <span>车手</span>
+            <span>积分</span>
+            <span className="text-center">冠军</span>
+            <span className="text-center">领奖台</span>
+            <span className="text-center">杆位</span>
           </div>
           {sorted.map((driver, index) => (
             <div
@@ -63,13 +63,13 @@ const StandingsPage: React.FC = () => {
                   style={{ backgroundColor: driver.teamColor }}
                 />
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
-                  <img src={driver.image} alt={driver.name} className="w-full h-full object-cover" />
+                  <img src={driver.image} alt={driver.nameZh} className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-white font-bold text-sm group-hover:text-primary transition-colors truncate">
-                    {driver.name}
+                    {driver.nameZh}
                   </p>
-                  <p className="text-gray-500 text-xs truncate">{driver.team}</p>
+                  <p className="text-gray-500 text-xs truncate">{driver.teamZh}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ const StandingsPage: React.FC = () => {
       <section>
         <h2 className="text-2xl font-black mb-6">
           <i className="fa-solid fa-people-group mr-3 text-primary" />
-          Constructor Standings
+          车队积分榜
         </h2>
         <div className="space-y-3">
           {teamStandings.map((team, index) => (
@@ -131,7 +131,7 @@ const StandingsPage: React.FC = () => {
                     />
                   </div>
                   <span className="text-white font-bold text-lg w-12 text-right">{team.points}</span>
-                  <span className="text-gray-600 text-xs">PTS</span>
+                  <span className="text-gray-600 text-xs">分</span>
                 </div>
               </div>
             </div>
