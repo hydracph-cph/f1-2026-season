@@ -87,25 +87,12 @@ export const countryFlag: Record<string, string> = {
   'Brazil': '🇧🇷', 'Qatar': '🇶🇦', 'United Arab Emirates': '🇦🇪', 'UAE': '🇦🇪',
 };
 
-export const driverImages: Record<string, string> = {
-  'max_verstappen': 'https://img.onedayboot.com/ai-image/2025-05-25/70936eb6-2e15-4de6-b19e-bbae16aaedb3.png',
-  'norris': 'https://img.onedayboot.com/ai-image/2025-05-25/e19dba57-8d5a-411e-b69e-38d0da2fdca9.png',
-  'leclerc': 'https://img.onedayboot.com/ai-image/2025-05-25/b56e60f3-0ca9-4f2f-a7e6-3f2e6e4edd81.png',
-  'hamilton': 'https://img.onedayboot.com/ai-image/2025-05-25/a92e4cf7-2a12-42b1-a74b-cb63f58f1d18.png',
-  'piastri': 'https://img.onedayboot.com/ai-image/2025-05-25/fe2d1c88-3c8b-44a3-a9b1-b82e14a6e5c9.png',
-  'russell': 'https://img.onedayboot.com/ai-image/2025-05-25/c7df3b6c-39a3-487e-94ae-39bf06b3ce4e.png',
-  'antonelli': 'https://img.onedayboot.com/ai-image/2025-05-25/fd9f4487-7e8e-4eba-8bc8-a94e9b65a5d5.png',
-  'sainz': 'https://img.onedayboot.com/ai-image/2025-05-25/9e82faa2-1c41-4685-9b31-21e116e59a85.png',
-  'alonso': 'https://img.onedayboot.com/ai-image/2025-05-25/84e39b6e-d19e-4b11-b3e6-07c34f87cc08.png',
-  'stroll': 'https://img.onedayboot.com/ai-image/2025-05-25/a7a5cfd5-0b19-4adb-a2eb-6f7b5a05e50e.png',
-  'gasly': 'https://img.onedayboot.com/ai-image/2025-05-25/e1bb5ce3-1bc1-444c-9d07-fa29bef9d5c2.png',
-  'doohan': 'https://img.onedayboot.com/ai-image/2025-05-25/a6adfe41-69a8-4a2e-a88f-3b5e6e6e22f3.png',
-  'tsunoda': 'https://img.onedayboot.com/ai-image/2025-05-25/6f2e9c80-5319-4b2f-b5e3-9a29a1e7f504.png',
-  'hadjar': 'https://img.onedayboot.com/ai-image/2025-05-25/b6b2fa22-86f6-406a-8d67-a4d77f32bba5.png',
-  'ocon': 'https://img.onedayboot.com/ai-image/2025-05-25/00dadd3a-5e41-47e1-9dcb-aae6d4e0f1b5.png',
-  'bearman': 'https://img.onedayboot.com/ai-image/2025-05-25/4cc51758-e3f7-4cb3-9a30-3acbc7a11bb1.png',
-  'hulkenberg': 'https://img.onedayboot.com/ai-image/2025-05-25/f30f4076-0c28-435e-9fe7-35f46d7b5beb.png',
-  'bortoleto': 'https://img.onedayboot.com/ai-image/2025-05-25/d16e6eb1-3eca-4eff-8590-ce29e1e5ade1.png',
-  'albon': 'https://img.onedayboot.com/ai-image/2025-05-25/f0c91c59-0ce2-4c96-bf6f-02f3e01e2b2f.png',
-  'lawson': 'https://img.onedayboot.com/ai-image/2025-05-25/e6d5c6af-7a16-41aa-89e3-1ca67b3e2df2.png',
-};
+export function makePlaceholderSvg(number: number, color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#1e1e2e"/>
+    <circle cx="100" cy="75" r="35" fill="${color}22" stroke="${color}" stroke-width="2"/>
+    <path d="M100 115 C60 115 35 145 35 175 L35 200 L165 200 L165 175 C165 145 140 115 100 115Z" fill="${color}22" stroke="${color}" stroke-width="2"/>
+    <text x="100" y="88" text-anchor="middle" fill="${color}" font-size="28" font-weight="bold" font-family="sans-serif">${number}</text>
+  </svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   driverNameZh, teamNameZh, teamColors, nationalityZh,
-  raceNameZh, countryZhMap, countryFlag, driverImages
+  raceNameZh, countryZhMap, countryFlag, makePlaceholderSvg
 } from '../data/driverMeta';
 
 export interface Driver {
@@ -145,8 +145,8 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
           points: parseFloat(s.points) || 0, wins: parseInt(s.wins) || 0,
           podiums: podiums[dId] || 0, fastestLaps: fls[dId] || 0,
           dob: d.dateOfBirth || '',
-          image: of1?.url || driverImages[dId] || buildImageUrl(fn, ln, '2026'),
-          fallbackImage: driverImages[dId] || buildImageUrl(fn, ln, '2026'),
+          image: of1?.url || buildImageUrl(fn, ln, '2026'),
+          fallbackImage: buildImageUrl(fn, ln, '2026'),
           teamColor: of1?.color || teamColors[c?.constructorId] || '#666',
           position: parseInt(s.position) || (i + 1),
         };
