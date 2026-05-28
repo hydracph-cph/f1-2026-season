@@ -97,9 +97,24 @@ const RaceDetail: React.FC = () => {
           });
           setSessions(sessArr);
 
-          const circuitId = raceData.Circuit?.circuitId || '';
-          if (circuitId) {
-            setCircuitImg(`https://media.formula1.com/image/upload/f_auto/q_auto/v1677245035/content/dam/fom-website/2018-redesign-assets/Circuit%20702/${circuitId}.png`);
+          const wikiUrl = raceData.Circuit?.url || '';
+          if (wikiUrl) {
+            const title = decodeURIComponent(wikiUrl.split('/wiki/').pop() || '');
+            if (title) {
+              try {
+                const wRes = await fetch(
+                  `https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&pithumbsize=600&redirects=1&titles=${encodeURIComponent(title)}`
+                );
+                const wData = await wRes.json();
+                const pages = wData?.query?.pages || {};
+                for (const p of Object.values<any>(pages)) {
+                  if (p?.thumbnail?.source) {
+                    setCircuitImg(p.thumbnail.source);
+                    break;
+                  }
+                }
+              } catch (_) {}
+            }
           }
         }
       }
