@@ -252,14 +252,24 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
         const rn = r.raceName || '';
         const w = winners[round];
         const rawTime = r.time || '';
-        const timeUTC = rawTime ? rawTime.replace(':00Z', ' UTC').replace('Z', ' UTC') : '';
+        let timeDisplay = '';
+        if (rawTime) {
+          const match = rawTime.match(/(\d{2}):(\d{2})/);
+          if (match) {
+            let h = parseInt(match[1]) + 8;
+            const m = match[2];
+            const nextDay = h >= 24;
+            if (nextDay) h -= 24;
+            timeDisplay = `${String(h).padStart(2, '0')}:${m} (UTC+8)`;
+          }
+        }
         return {
           round: parseInt(round), name: rn,
           nameZh: raceNameZh[rn] || rn,
           circuit: r.Circuit?.circuitName || '', country,
           countryZh: countryZhMap[country] || country,
           date: r.date || '',
-          time: timeUTC,
+          time: timeDisplay,
           status: completedRounds.has(round) ? 'completed' as const : 'upcoming' as const,
           winnerId: w?.id, winner: w?.name,
           winnerZh: w ? (driverNameZh[w.id]?.split('·').pop() || w.name) : undefined,
