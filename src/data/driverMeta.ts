@@ -13,6 +13,9 @@ export const driverNameZh: Record<string, string> = {
   'bottas': '瓦尔特里·博塔斯', 'zhou': '周冠宇',
   'magnussen': '凯文·马格努森', 'sargeant': '洛根·萨金特',
   'colapinto': '弗朗哥·科拉皮托', 'de_vries': '尼克·德弗里斯',
+  'lindblad': '阿尔维德·林德布拉德', 'drugovich': '费利佩·德鲁戈维奇',
+  'iwasa': '岩佐歩梦', 'o_sullivan': '扎克·奥沙利文',
+  'leclerc_arthur': '亚瑟·勒克莱尔', 'fittipaldi': '恩佐·菲蒂帕尔迪',
 };
 
 export const teamNameZh: Record<string, string> = {

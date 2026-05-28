@@ -10,6 +10,9 @@ const wikiTitleOverrides: Record<string, string> = {
   'sainz': 'Carlos Sainz Jr.',
   'hulkenberg': 'Nico Hülkenberg',
   'leclerc': 'Charles Leclerc',
+  'lindblad': 'Arvid Lindblad',
+  'drugovich': 'Felipe Drugovich',
+  'iwasa': 'Ayumu Iwasa',
 };
 
 export interface Driver {
