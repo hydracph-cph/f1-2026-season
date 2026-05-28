@@ -127,9 +127,10 @@ const HomePage: React.FC = () => {
           {races.map((race) => (
             <div
               key={race.round}
-              className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${
+              onClick={() => navigate(`/race/${race.round}`)}
+              className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
                 race.status === 'next'
-                  ? 'bg-primary/10 border-primary/40'
+                  ? 'bg-primary/10 border-primary/40 hover:border-primary/60'
                   : race.status === 'completed'
                   ? 'bg-f1-card/50 border-f1-border hover:border-gray-600'
                   : 'bg-f1-card border-f1-border hover:border-gray-600'
