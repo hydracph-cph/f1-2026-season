@@ -22,6 +22,7 @@ export interface Driver {
   fastestLaps: number;
   dob: string;
   image: string;
+  fallbackImage: string;
   teamColor: string;
   position: number;
 }
@@ -144,7 +145,8 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
           points: parseFloat(s.points) || 0, wins: parseInt(s.wins) || 0,
           podiums: podiums[dId] || 0, fastestLaps: fls[dId] || 0,
           dob: d.dateOfBirth || '',
-          image: driverImages[dId] || of1?.url || buildImageUrl(fn, ln, '2025'),
+          image: of1?.url || driverImages[dId] || buildImageUrl(fn, ln, '2026'),
+          fallbackImage: driverImages[dId] || buildImageUrl(fn, ln, '2026'),
           teamColor: of1?.color || teamColors[c?.constructorId] || '#666',
           position: parseInt(s.position) || (i + 1),
         };

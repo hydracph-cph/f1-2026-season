@@ -75,7 +75,15 @@ const HomePage: React.FC = () => {
                   alt={driver.nameZh}
                   className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/300x300/1e1e2e/666?text=${driver.number}`;
+                    const img = e.target as HTMLImageElement;
+                    if (img.dataset.fallback === '2') return;
+                    if (!img.dataset.fallback && driver.fallbackImage) {
+                      img.dataset.fallback = '1';
+                      img.src = driver.fallbackImage;
+                    } else {
+                      img.dataset.fallback = '2';
+                      img.src = `https://placehold.co/300x300/1e1e2e/666?text=${driver.number}`;
+                    }
                   }}
                 />
                 <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1">

@@ -79,7 +79,15 @@ const DriversPage: React.FC = () => {
                   alt={driver.nameZh}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/100x100/1e1e2e/666?text=${driver.number}`;
+                    const img = e.target as HTMLImageElement;
+                    if (img.dataset.fallback === '2') return;
+                    if (!img.dataset.fallback && driver.fallbackImage) {
+                      img.dataset.fallback = '1';
+                      img.src = driver.fallbackImage;
+                    } else {
+                      img.dataset.fallback = '2';
+                      img.src = `https://placehold.co/100x100/1e1e2e/666?text=${driver.number}`;
+                    }
                   }}
                 />
               </div>
