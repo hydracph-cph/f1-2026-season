@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   driverNameZh, teamNameZh, teamColors, nationalityZh,
   raceNameZh, countryZhMap, countryFlag
 } from '../data/driverMeta';
+import { cachedStandings, cachedSchedule, cachedResults, CACHE_TIMESTAMP } from '../data/cachedData';
 
 // 部分车手的 Wikipedia 页面标题与"FirstName LastName"不完全相同，
 // 在这里手动列出需要重定向的车手。其他 95% 的车手都能直接命中页面。
@@ -132,8 +133,19 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [state, setState] = useState<F1ContextType>({
     drivers: [], races: [], loading: true, error: null, season: '2026'
   });
+  const hasLoadedCache = useRef(false);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    // 第一步：立即用本地缓存数据渲染（秒开）
+    if (!hasLoadedCache.current) {
+      hasLoadedCache.current = true;
+      processData(cachedStandings, cachedSchedule, cachedResults, null).then(result => {
+        if (result) setState(result);
+      });
+    }
+    // 第二步：后台静默从 API 刷新最新数据
+    loadData();
+  }, []);
 
   async function loadData() {
     try {
@@ -144,150 +156,144 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
         fetch('https://api.openf1.org/v1/drivers?session_key=latest').then(r => r.json()),
       ]);
 
-      const rawStandings = sRes.status === 'fulfilled'
-        ? sRes.value?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings ?? [] : [];
-      const rawSchedule = schRes.status === 'fulfilled'
-        ? schRes.value?.MRData?.RaceTable?.Races ?? [] : [];
-      const rawResults = rRes.status === 'fulfilled'
-        ? rRes.value?.MRData?.RaceTable?.Races ?? [] : [];
-      const of1Drivers = of1Res.status === 'fulfilled' && Array.isArray(of1Res.value)
-        ? of1Res.value : [];
+      const standingsData = sRes.status === 'fulfilled' ? sRes.value : cachedStandings;
+      const scheduleData = schRes.status === 'fulfilled' ? schRes.value : cachedSchedule;
+      const resultsData = rRes.status === 'fulfilled' ? rRes.value : cachedResults;
+      const of1Data = of1Res.status === 'fulfilled' && Array.isArray(of1Res.value) ? of1Res.value : null;
 
-      const imgMap: Record<string, { url: string; color: string }> = {};
-      for (const d of of1Drivers) {
-        if (d.last_name && d.headshot_url) {
-          let hdUrl: string = d.headshot_url;
-
-          // 关键修复 1：去掉 Cloudinary 的 "fallback image" 指令
-          // 这个指令会在原图找不到时返回一张银色剪影占位图（HTTP 200），
-          // 导致浏览器以为加载成功、onError 永远不触发。
-          hdUrl = hdUrl.replace(/\/d_driver_fallback_image\.png\//, '/');
-
-          // 关键修复 2：把过期的 /{year}Drivers/ 路径改写成新版 /{车手代号首字母}/
-          // F1 官网 2024 年起按 driver code 的首字母分目录（即 firstName 的首字母）
-          const fnNorm = (d.first_name || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
-          const letter = (fnNorm.charAt(0) || d.name_acronym?.charAt(0) || 'X').toUpperCase();
-          hdUrl = hdUrl.replace(/\/\d{4}Drivers\//, `/${letter}/`);
-
-          // 用高清版本
-          hdUrl = hdUrl
-            .replace(/\/1col\//, '/2col-retina/')
-            .replace(/\/2col\//, '/2col-retina/')
-            .replace(/\/1col-retina\//, '/2col-retina/');
-          if (!hdUrl.includes('/2col-retina/') && /\.png$/.test(hdUrl)) {
-            hdUrl = hdUrl.replace(/\.png$/, '.png.transform/2col-retina/image.png');
-          }
-
-          imgMap[d.last_name.toLowerCase()] = {
-            url: hdUrl, color: d.team_colour ? `#${d.team_colour}` : '',
-          };
-        }
-      }
-
-      const podiums: Record<string, number> = {};
-      const fls: Record<string, number> = {};
-      const winners: Record<string, { name: string; id: string }> = {};
-      for (const race of rawResults) {
-        for (const r of (race.Results || [])) {
-          const did = r.Driver?.driverId;
-          if (!did) continue;
-          const pos = parseInt(r.position);
-          if (pos <= 3) podiums[did] = (podiums[did] || 0) + 1;
-          if (r.FastestLap?.rank === '1') fls[did] = (fls[did] || 0) + 1;
-          if (pos === 1) {
-            winners[race.round] = {
-              name: `${r.Driver.givenName} ${r.Driver.familyName}`, id: did,
-            };
-          }
-        }
-      }
-
-      const completedRounds = new Set(rawResults.map((r: any) => r.round));
-
-      // 先把车手 id+姓名提取出来，一次性批量查 Wikipedia 头像
-      const driverBasics = rawStandings.map((s: any) => ({
-        id: s.Driver.driverId,
-        firstName: s.Driver.givenName,
-        lastName: s.Driver.familyName,
-      }));
-      let wikiImages: Record<string, string> = {};
-      try {
-        wikiImages = await fetchWikipediaImages(driverBasics);
-      } catch (err) {
-        console.warn('Wikipedia 头像批量请求失败:', err);
-      }
-
-      const drivers: Driver[] = rawStandings.map((s: any, i: number) => {
-        const d = s.Driver;
-        const c = s.Constructors?.[0];
-        const dId = d.driverId;
-        const fn = d.givenName;
-        const ln = d.familyName;
-        const of1 = imgMap[ln.toLowerCase()];
-        // 头像优先级：Wikipedia API 返回的真实 URL（首选）
-        //         → OpenF1 实时 headshot（兜底 1）
-        //         → F1 官网模板（兜底 2）
-        const primaryImage = wikiImages[dId] || of1?.url || buildImageUrl(fn, ln);
-        const fallbackImage = of1?.url && of1.url !== primaryImage
-          ? of1.url
-          : buildImageUrl(fn, ln);
-        return {
-          id: dId, name: `${fn} ${ln}`, nameZh: driverNameZh[dId] || `${fn} ${ln}`,
-          firstName: fn, lastName: ln,
-          team: c?.name || '', teamId: c?.constructorId || '',
-          teamZh: teamNameZh[c?.constructorId] || c?.name || '',
-          number: parseInt(d.permanentNumber) || 0,
-          nationality: d.nationality || '',
-          nationalityZh: nationalityZh[d.nationality] || d.nationality || '',
-          points: parseFloat(s.points) || 0, wins: parseInt(s.wins) || 0,
-          podiums: podiums[dId] || 0, fastestLaps: fls[dId] || 0,
-          dob: d.dateOfBirth || '',
-          image: primaryImage,
-          fallbackImage,
-          teamColor: of1?.color || teamColors[c?.constructorId] || '#666',
-          position: parseInt(s.position) || (i + 1),
-        };
-      });
-
-      const races: Race[] = rawSchedule.map((r: any) => {
-        const round = r.round;
-        const country = r.Circuit?.Location?.country || '';
-        const rn = r.raceName || '';
-        const w = winners[round];
-        const rawTime = r.time || '';
-        let timeDisplay = '';
-        if (rawTime) {
-          const match = rawTime.match(/(\d{2}):(\d{2})/);
-          if (match) {
-            let h = parseInt(match[1]) + 8;
-            const m = match[2];
-            const nextDay = h >= 24;
-            if (nextDay) h -= 24;
-            timeDisplay = `${String(h).padStart(2, '0')}:${m} (UTC+8)`;
-          }
-        }
-        return {
-          round: parseInt(round), name: rn,
-          nameZh: raceNameZh[rn] || rn,
-          circuit: r.Circuit?.circuitName || '', country,
-          countryZh: countryZhMap[country] || country,
-          date: r.date || '',
-          time: timeDisplay,
-          status: completedRounds.has(round) ? 'completed' as const : 'upcoming' as const,
-          winnerId: w?.id, winner: w?.name,
-          winnerZh: w ? (driverNameZh[w.id]?.split('·').pop() || w.name) : undefined,
-          flag: countryFlag[country] || '🏁',
-        };
-      });
-
-      const first = races.find(r => r.status === 'upcoming');
-      if (first) first.status = 'next';
-
-      const detectedSeason = rawSchedule?.[0]?.season || '2026';
-      setState({ drivers, races, loading: false, error: null, season: detectedSeason });
+      const result = await processData(standingsData, scheduleData, resultsData, of1Data);
+      if (result) setState(result);
     } catch (e: any) {
       setState(prev => ({ ...prev, loading: false, error: e.message }));
     }
+  }
+
+  async function processData(standingsData: any, scheduleData: any, resultsData: any, of1Data: any[] | null): Promise<F1ContextType | null> {
+    const rawStandings = standingsData?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings ?? [];
+    const rawSchedule = scheduleData?.MRData?.RaceTable?.Races ?? [];
+    const rawResults = resultsData?.MRData?.RaceTable?.Races ?? [];
+    const of1Drivers = of1Data || [];
+
+    if (!rawStandings.length && !rawSchedule.length) return null;
+
+    const imgMap: Record<string, { url: string; color: string }> = {};
+    for (const d of of1Drivers) {
+      if (d.last_name && d.headshot_url) {
+        let hdUrl: string = d.headshot_url;
+        hdUrl = hdUrl.replace(/\/d_driver_fallback_image\.png\//, '/');
+        const fnNorm = (d.first_name || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
+        const letter = (fnNorm.charAt(0) || d.name_acronym?.charAt(0) || 'X').toUpperCase();
+        hdUrl = hdUrl.replace(/\/\d{4}Drivers\//, `/${letter}/`);
+        hdUrl = hdUrl
+          .replace(/\/1col\//, '/2col-retina/')
+          .replace(/\/2col\//, '/2col-retina/')
+          .replace(/\/1col-retina\//, '/2col-retina/');
+        if (!hdUrl.includes('/2col-retina/') && /\.png$/.test(hdUrl)) {
+          hdUrl = hdUrl.replace(/\.png$/, '.png.transform/2col-retina/image.png');
+        }
+        imgMap[d.last_name.toLowerCase()] = {
+          url: hdUrl, color: d.team_colour ? `#${d.team_colour}` : '',
+        };
+      }
+    }
+
+    const podiums: Record<string, number> = {};
+    const fls: Record<string, number> = {};
+    const winners: Record<string, { name: string; id: string }> = {};
+    for (const race of rawResults) {
+      for (const r of (race.Results || [])) {
+        const did = r.Driver?.driverId;
+        if (!did) continue;
+        const pos = parseInt(r.position);
+        if (pos <= 3) podiums[did] = (podiums[did] || 0) + 1;
+        if (r.FastestLap?.rank === '1') fls[did] = (fls[did] || 0) + 1;
+        if (pos === 1) {
+          winners[race.round] = {
+            name: `${r.Driver.givenName} ${r.Driver.familyName}`, id: did,
+          };
+        }
+      }
+    }
+
+    const completedRounds = new Set(rawResults.map((r: any) => r.round));
+
+    const driverBasics = rawStandings.map((s: any) => ({
+      id: s.Driver.driverId,
+      firstName: s.Driver.givenName,
+      lastName: s.Driver.familyName,
+    }));
+    let wikiImages: Record<string, string> = {};
+    try {
+      wikiImages = await fetchWikipediaImages(driverBasics);
+    } catch (err) {
+      console.warn('Wikipedia 头像批量请求失败:', err);
+    }
+
+    const drivers: Driver[] = rawStandings.map((s: any, i: number) => {
+      const d = s.Driver;
+      const c = s.Constructors?.[0];
+      const dId = d.driverId;
+      const fn = d.givenName;
+      const ln = d.familyName;
+      const of1 = imgMap[ln.toLowerCase()];
+      const primaryImage = wikiImages[dId] || of1?.url || buildImageUrl(fn, ln);
+      const fallbackImage = of1?.url && of1.url !== primaryImage
+        ? of1.url
+        : buildImageUrl(fn, ln);
+      return {
+        id: dId, name: `${fn} ${ln}`, nameZh: driverNameZh[dId] || `${fn} ${ln}`,
+        firstName: fn, lastName: ln,
+        team: c?.name || '', teamId: c?.constructorId || '',
+        teamZh: teamNameZh[c?.constructorId] || c?.name || '',
+        number: parseInt(d.permanentNumber) || 0,
+        nationality: d.nationality || '',
+        nationalityZh: nationalityZh[d.nationality] || d.nationality || '',
+        points: parseFloat(s.points) || 0, wins: parseInt(s.wins) || 0,
+        podiums: podiums[dId] || 0, fastestLaps: fls[dId] || 0,
+        dob: d.dateOfBirth || '',
+        image: primaryImage,
+        fallbackImage,
+        teamColor: of1?.color || teamColors[c?.constructorId] || '#666',
+        position: parseInt(s.position) || (i + 1),
+      };
+    });
+
+    const races: Race[] = rawSchedule.map((r: any) => {
+      const round = r.round;
+      const country = r.Circuit?.Location?.country || '';
+      const rn = r.raceName || '';
+      const w = winners[round];
+      const rawTime = r.time || '';
+      let timeDisplay = '';
+      if (rawTime) {
+        const match = rawTime.match(/(\d{2}):(\d{2})/);
+        if (match) {
+          let h = parseInt(match[1]) + 8;
+          const m = match[2];
+          const nextDay = h >= 24;
+          if (nextDay) h -= 24;
+          timeDisplay = `${String(h).padStart(2, '0')}:${m} (UTC+8)`;
+        }
+      }
+      return {
+        round: parseInt(round), name: rn,
+        nameZh: raceNameZh[rn] || rn,
+        circuit: r.Circuit?.circuitName || '', country,
+        countryZh: countryZhMap[country] || country,
+        date: r.date || '',
+        time: timeDisplay,
+        status: completedRounds.has(round) ? 'completed' as const : 'upcoming' as const,
+        winnerId: w?.id, winner: w?.name,
+        winnerZh: w ? (driverNameZh[w.id]?.split('·').pop() || w.name) : undefined,
+        flag: countryFlag[country] || '🏁',
+      };
+    });
+
+    const first = races.find(r => r.status === 'upcoming');
+    if (first) first.status = 'next';
+
+    const detectedSeason = rawSchedule?.[0]?.season || '2026';
+    return { drivers, races, loading: false, error: null, season: detectedSeason };
   }
 
   return <F1Context.Provider value={state}>{children}</F1Context.Provider>;
