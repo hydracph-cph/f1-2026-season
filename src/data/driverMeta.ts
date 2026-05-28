@@ -91,6 +91,9 @@ export const teamLogos: Record<string, string> = {
   'sauber': 'https://media.formula1.com/content/dam/fom-website/teams/2024/kick-sauber-logo.png.transform/2col-retina/image.png',
   'kick_sauber': 'https://media.formula1.com/content/dam/fom-website/teams/2024/kick-sauber-logo.png.transform/2col-retina/image.png',
   'alphatauri': 'https://media.formula1.com/content/dam/fom-website/teams/2024/rb-logo.png.transform/2col-retina/image.png',
+  'audi': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Audi-Logo_2016.svg/200px-Audi-Logo_2016.svg.png',
+  'cadillac': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Cadillac_Logo.svg/200px-Cadillac_Logo.svg.png',
+  'andretti': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Cadillac_Logo.svg/200px-Cadillac_Logo.svg.png',
 };
 
 export const countryFlag: Record<string, string> = {
