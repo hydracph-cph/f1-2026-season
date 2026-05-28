@@ -92,8 +92,16 @@ export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }
       const imgMap: Record<string, { url: string; color: string }> = {};
       for (const d of of1Drivers) {
         if (d.last_name && d.headshot_url) {
+          let hdUrl = d.headshot_url;
+          hdUrl = hdUrl
+            .replace(/\/1col\//, '/2col-retina/')
+            .replace(/\/2col\//, '/2col-retina/')
+            .replace(/\/1col-retina\//, '/2col-retina/');
+          if (!hdUrl.includes('/2col-retina/') && hdUrl.includes('.png')) {
+            hdUrl = hdUrl.replace(/\.png$/, '.png.transform/2col-retina/image.png');
+          }
           imgMap[d.last_name.toLowerCase()] = {
-            url: d.headshot_url, color: d.team_colour ? `#${d.team_colour}` : '',
+            url: hdUrl, color: d.team_colour ? `#${d.team_colour}` : '',
           };
         }
       }
