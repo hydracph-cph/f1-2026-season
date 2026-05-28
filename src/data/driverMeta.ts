@@ -86,3 +86,37 @@ export const countryFlag: Record<string, string> = {
   'Netherlands': '🇳🇱', 'Azerbaijan': '🇦🇿', 'Singapore': '🇸🇬', 'Mexico': '🇲🇽',
   'Brazil': '🇧🇷', 'Qatar': '🇶🇦', 'United Arab Emirates': '🇦🇪', 'UAE': '🇦🇪',
 };
+
+const F1_IMG = 'https://media.formula1.com/content/dam/fom-website/drivers';
+const s = (y: string, code: string, first: string, last: string) =>
+  `${F1_IMG}/${y}Drivers/${code}01_${first}_${last}/${code.toLowerCase()}01.png.transform/2col-retina/image.png`;
+
+export const driverImages: Record<string, string> = {
+  'max_verstappen': s('2025', 'MAXVER', 'Max', 'Verstappen'),
+  'norris': s('2025', 'LANNOR', 'Lando', 'Norris'),
+  'leclerc': s('2025', 'CHALEC', 'Charles', 'Leclerc'),
+  'hamilton': s('2025', 'LEWHAM', 'Lewis', 'Hamilton'),
+  'piastri': s('2025', 'OSCPIA', 'Oscar', 'Piastri'),
+  'russell': s('2025', 'GEORUS', 'George', 'Russell'),
+  'antonelli': s('2025', 'KIMANT', 'Kimi', 'Antonelli'),
+  'sainz': s('2025', 'CARSAI', 'Carlos', 'Sainz'),
+  'alonso': s('2025', 'FERALO', 'Fernando', 'Alonso'),
+  'stroll': s('2025', 'LANSTR', 'Lance', 'Stroll'),
+  'gasly': s('2025', 'PIEGAS', 'Pierre', 'Gasly'),
+  'doohan': s('2025', 'JACDOO', 'Jack', 'Doohan'),
+  'tsunoda': s('2025', 'YUKTSU', 'Yuki', 'Tsunoda'),
+  'hadjar': s('2025', 'ISAHAD', 'Isack', 'Hadjar'),
+  'ocon': s('2025', 'ESTOCO', 'Esteban', 'Ocon'),
+  'bearman': s('2025', 'OLIBEA', 'Oliver', 'Bearman'),
+  'hulkenberg': s('2025', 'NICHUL', 'Nico', 'Hulkenberg'),
+  'bortoleto': s('2025', 'GABBOR', 'Gabriel', 'Bortoleto'),
+  'albon': s('2025', 'ALEALB', 'Alexander', 'Albon'),
+  'lawson': s('2025', 'LIALAW', 'Liam', 'Lawson'),
+  'perez': s('2024', 'SERPER', 'Sergio', 'Perez'),
+  'ricciardo': s('2024', 'DANRIC', 'Daniel', 'Ricciardo'),
+  'bottas': s('2024', 'VALBOT', 'Valtteri', 'Bottas'),
+  'zhou': s('2024', 'GUAZHO', 'Guanyu', 'Zhou'),
+  'magnussen': s('2024', 'KEVMAG', 'Kevin', 'Magnussen'),
+  'colapinto': s('2024', 'FRACOL', 'Franco', 'Colapinto'),
+  'sargeant': s('2024', 'LOGSAR', 'Logan', 'Sargeant'),
+};
