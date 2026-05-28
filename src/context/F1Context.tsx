@@ -62,37 +62,38 @@ function proxyImg(url: string): string {
   return `/api/oneday-proxy/${encodeURIComponent(url)}`;
 }
 
+const SUZUKA_BASE = 'https://www.suzukacircuit.jp/f1/guide/driver/img';
+
 const driverImageMap: Record<string, string> = {
-  'max_verstappen': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/MAXVER01_Max_Verstappen/maxver01.png.transform/2col-retina/image.png',
-  'norris': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/LANNOR01_Lando_Norris/lannor01.png.transform/2col-retina/image.png',
-  'leclerc': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/CHALEC01_Charles_Leclerc/chalec01.png.transform/2col-retina/image.png',
-  'hamilton': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/LEWHAM01_Lewis_Hamilton/lewham01.png.transform/2col-retina/image.png',
-  'piastri': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/OSCPIA01_Oscar_Piastri/oscpia01.png.transform/2col-retina/image.png',
-  'russell': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/GEORUS01_George_Russell/georus01.png.transform/2col-retina/image.png',
-  'sainz': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/CARSAI01_Carlos_Sainz/carsai01.png.transform/2col-retina/image.png',
-  'alonso': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/FERALO01_Fernando_Alonso/feralo01.png.transform/2col-retina/image.png',
-  'stroll': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/LANSTR01_Lance_Stroll/lanstr01.png.transform/2col-retina/image.png',
-  'gasly': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/PIEGAS01_Pierre_Gasly/piegas01.png.transform/2col-retina/image.png',
-  'ocon': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/ESTOCO01_Esteban_Ocon/estoco01.png.transform/2col-retina/image.png',
-  'tsunoda': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/YUKTSU01_Yuki_Tsunoda/yuktsu01.png.transform/2col-retina/image.png',
-  'hulkenberg': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/NICHUL01_Nico_Hulkenberg/nichul01.png.transform/2col-retina/image.png',
-  'albon': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/ALEALB01_Alexander_Albon/alealb01.png.transform/2col-retina/image.png',
-  'lawson': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/LIALAW01_Liam_Lawson/lialaw01.png.transform/2col-retina/image.png',
-  'bearman': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/OLIBEA01_Oliver_Bearman/olibea01.png.transform/2col-retina/image.png',
-  'antonelli': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/KIMANT01_Kimi_Antonelli/kimant01.png.transform/2col-retina/image.png',
-  'doohan': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/JACDOO01_Jack_Doohan/jacdoo01.png.transform/2col-retina/image.png',
-  'hadjar': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/ISAHAD01_Isack_Hadjar/isahad01.png.transform/2col-retina/image.png',
-  'bortoleto': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/GABBOR01_Gabriel_Bortoleto/gabbor01.png.transform/2col-retina/image.png',
-  'colapinto': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/FRACOL01_Franco_Colapinto/fracol01.png.transform/2col-retina/image.png',
-  'perez': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/SERPER01_Sergio_Perez/serper01.png.transform/2col-retina/image.png',
-  'ricciardo': 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/DANRIC01_Daniel_Ricciardo/danric01.png.transform/2col-retina/image.png',
+  'max_verstappen': `${SUZUKA_BASE}/max-verstappen.jpg`,
+  'norris': `${SUZUKA_BASE}/lando-norris.jpg`,
+  'leclerc': `${SUZUKA_BASE}/charles-leclerc.jpg`,
+  'hamilton': `${SUZUKA_BASE}/lewis-hamilton.jpg`,
+  'piastri': `${SUZUKA_BASE}/oscar-piastri.jpg`,
+  'russell': `${SUZUKA_BASE}/george-russell.jpg`,
+  'sainz': `${SUZUKA_BASE}/carlos-sainz.jpg`,
+  'alonso': `${SUZUKA_BASE}/fernando-alonso.jpg`,
+  'stroll': `${SUZUKA_BASE}/lance-stroll.jpg`,
+  'gasly': `${SUZUKA_BASE}/pierre-gasly.jpg`,
+  'ocon': `${SUZUKA_BASE}/esteban-ocon.jpg`,
+  'tsunoda': `${SUZUKA_BASE}/yuki-tsunoda.jpg`,
+  'hulkenberg': `${SUZUKA_BASE}/nico-hulkenberg.jpg`,
+  'albon': `${SUZUKA_BASE}/alexander-albon.jpg`,
+  'lawson': `${SUZUKA_BASE}/liam-lawson.jpg`,
+  'bearman': `${SUZUKA_BASE}/oliver-bearman.jpg`,
+  'antonelli': `${SUZUKA_BASE}/kimi-antonelli.jpg`,
+  'doohan': `${SUZUKA_BASE}/jack-doohan.jpg`,
+  'hadjar': `${SUZUKA_BASE}/isack-hadjar.jpg`,
+  'bortoleto': `${SUZUKA_BASE}/gabriel-bortoleto.jpg`,
+  'colapinto': `${SUZUKA_BASE}/franco-colapinto.jpg`,
+  'perez': `${SUZUKA_BASE}/sergio-perez.jpg`,
+  'ricciardo': `${SUZUKA_BASE}/daniel-ricciardo.jpg`,
 };
 
 function buildImageUrl(firstName: string, lastName: string, _year: string): string {
-  const fn = firstName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const ln = lastName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const code = (fn.substring(0, 3) + ln.substring(0, 3)).toUpperCase();
-  return `https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/2024Drivers/${code}01_${fn}_${ln}/${code.toLowerCase()}01.png.transform/2col-retina/image.png`;
+  const fn = firstName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const ln = lastName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return `${SUZUKA_BASE}/${fn}-${ln}.jpg`;
 }
 
 export const F1Provider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
