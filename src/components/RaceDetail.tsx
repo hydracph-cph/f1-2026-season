@@ -1,7 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useF1 } from '../context/F1Context';
-import { driverNameZh } from '../data/driverMeta';
+import { driverNameZh, circuitInfo } from '../data/driverMeta';
+
+// ergast API 返回的 country 名 → circuitInfo 中的 key 映射
+const countryToCircuitKey: Record<string, string> = {
+  'Australia': 'australia',
+  'China': 'china',
+  'Japan': 'japan',
+  'Bahrain': 'bahrain',
+  'Saudi Arabia': 'saudi-arabia',
+  'USA': 'miami',
+  'Italy': 'emilia-romagna',
+  'Monaco': 'monaco',
+  'Spain': 'spain',
+  'Canada': 'canada',
+  'Austria': 'austria',
+  'UK': 'britain',
+  'Belgium': 'belgium',
+  'Hungary': 'hungary',
+  'Netherlands': 'netherlands',
+  'Azerbaijan': 'azerbaijan',
+  'Singapore': 'singapore',
+  'United States': 'united-states',
+  'Mexico': 'mexico',
+  'Brazil': 'sao-paulo',
+  'Qatar': 'qatar',
+  'United Arab Emirates': 'abu-dhabi',
+  'UAE': 'abu-dhabi',
+};
 
 interface SessionTime {
   name: string;
@@ -45,13 +72,26 @@ function toUTC8(date: string, time: string): string {
 const RaceDetail: React.FC = () => {
   const { round } = useParams<{ round: string }>();
   const navigate = useNavigate();
-  const { races, loading: contextLoading } = useF1();
+  const { races, drivers, loading: contextLoading } = useF1();
   const [sessions, setSessions] = useState<SessionTime[]>([]);
   const [results, setResults] = useState<RaceResult[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(true);
-  const [circuitImg, setCircuitImg] = useState('');
 
   const race = races.find(r => r.round === parseInt(round || '0'));
+
+  // 通过 race name 精确匹配赛道（解决同国家多赛道问题）
+  const getCircuitKey = (): string => {
+    if (!race) return '';
+    const name = race.name.toLowerCase();
+    if (name.includes('miami')) return 'miami';
+    if (name.includes('las vegas')) return 'las-vegas';
+    if (name.includes('emilia') || name.includes('imola')) return 'emilia-romagna';
+    if (name.includes('italian') || name.includes('monza')) return 'italy';
+    if (name.includes('united states') || name.includes('austin')) return 'united-states';
+    if (name.includes('são paulo') || name.includes('sao paulo') || name.includes('brazil')) return 'sao-paulo';
+    return countryToCircuitKey[race.country] || '';
+  };
+  const circuitData = circuitInfo[getCircuitKey()];
 
   useEffect(() => {
     if (!round) return;
@@ -96,11 +136,6 @@ const RaceDetail: React.FC = () => {
             return da.localeCompare(db);
           });
           setSessions(sessArr);
-
-          const circuitId = raceData.Circuit?.circuitId || '';
-          if (circuitId) {
-            setCircuitImg(`https://media.formula1.com/image/upload/f_auto/q_auto/v1677245035/content/dam/fom-website/2018-redesign-assets/Circuit%20702/${circuitId}.png`);
-          }
         }
       }
 
@@ -188,22 +223,57 @@ const RaceDetail: React.FC = () => {
                 </p>
               )}
             </div>
-            {circuitImg && (
-              <div className="lg:w-80 flex-shrink-0">
-                <div className="bg-white/5 rounded-xl p-4 border border-f1-border">
-                  <img
-                    src={circuitImg}
-                    alt="赛道图"
-                    className="w-full h-auto object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <p className="text-center text-gray-500 text-xs mt-2">赛道布局</p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {circuitData && (
+        <section className="mb-8">
+          <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+            <i className="fa-solid fa-road text-primary" />
+            赛道信息
+          </h2>
+          <div className="bg-f1-card border border-f1-border rounded-xl overflow-hidden">
+            <div className="p-6">
+              <div className="bg-white/5 rounded-xl p-4 border border-f1-border mb-6">
+                <img
+                  src={circuitData.trackmapUrl}
+                  alt={circuitData.nameZh}
+                  className="w-full h-auto object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <p className="text-center text-gray-500 text-xs mt-2">{circuitData.nameZh} - 赛道布局图</p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="bg-black/30 rounded-lg p-4 border border-f1-border">
+                  <p className="text-gray-500 text-xs mb-1">赛道长度</p>
+                  <p className="text-white text-lg font-bold">{circuitData.circuitLength}</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-4 border border-f1-border">
+                  <p className="text-gray-500 text-xs mb-1">首届大奖赛</p>
+                  <p className="text-white text-lg font-bold">{circuitData.firstGrandPrix}</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-4 border border-f1-border">
+                  <p className="text-gray-500 text-xs mb-1">比赛圈数</p>
+                  <p className="text-white text-lg font-bold">{circuitData.numberOfLaps} 圈</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-4 border border-f1-border">
+                  <p className="text-gray-500 text-xs mb-1">最快圈速</p>
+                  <p className="text-white text-sm font-bold">{circuitData.fastestLap}</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-4 border border-f1-border">
+                  <p className="text-gray-500 text-xs mb-1">比赛距离</p>
+                  <p className="text-white text-lg font-bold">{circuitData.raceDistance}</p>
+                </div>
+                <div className="bg-black/30 rounded-lg p-4 border border-f1-border">
+                  <p className="text-gray-500 text-xs mb-1">弯道数量</p>
+                  <p className="text-white text-lg font-bold">{circuitData.numberOfTurns} 个</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {sessions.length > 0 && (
         <section className="mb-8">
@@ -257,7 +327,32 @@ const RaceDetail: React.FC = () => {
                     <span className="text-gray-500 font-semibold text-sm pl-1.5">{r.position}</span>
                   )}
                 </div>
-                <span className="text-white text-sm font-medium truncate">{r.driverNameZh}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
+                    {(() => {
+                      const d = drivers.find(d => d.id === r.driverId);
+                      return d ? (
+                        <img
+                          src={d.image}
+                          alt={r.driverNameZh}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            if (img.dataset.fallback === '2') return;
+                            if (!img.dataset.fallback && d.fallbackImage) {
+                              img.dataset.fallback = '1';
+                              img.src = d.fallbackImage;
+                            } else {
+                              img.dataset.fallback = '2';
+                              img.src = `https://placehold.co/28x28/1e1e2e/666?text=${d.number}`;
+                            }
+                          }}
+                        />
+                      ) : null;
+                    })()}
+                  </div>
+                  <span className="text-white text-sm font-medium truncate">{r.driverNameZh}</span>
+                </div>
                 <span className="text-gray-500 text-xs truncate">{r.team}</span>
                 <span className="text-gray-400 text-xs text-center">{r.laps}</span>
                 <span className="text-gray-400 text-xs text-right truncate">{r.time}</span>
